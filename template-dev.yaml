@@ -1,0 +1,66 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  lambda-nodejs16.x-1 dev
+Resources:
+  Function1APIDEV:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: Function1API-DEV
+      StageName: Dev
+      BinaryMediaTypes: ["*/*"]
+  Function2APIDEV:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: Function2API-DEV
+      StageName: Dev
+      BinaryMediaTypes: ["*/*"] 
+  Function1DEVFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      FunctionName: dev-function1
+      CodeUri: .rollup/function1
+      Handler: app.lambdaHandler
+      Runtime: nodejs16.x
+      Architectures:
+        - x86_64
+      Timeout: 3
+      MemorySize: 128
+      Events:
+        Function1:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /dev-function1
+            Method: get
+            RestApiId: !Ref Function1APIDEV                   
+  Function2DEVFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      FunctionName: dev-function2
+      CodeUri: .rollup/function2
+      Handler: app.lambdaHandler
+      Runtime: nodejs16.x
+      Architectures:
+        - x86_64
+      Timeout: 10
+      MemorySize: 128
+      Events:
+        Function2:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /dev-function2
+            Method: get
+            RestApiId: !Ref Function2APIDEV           
+Outputs:
+  # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
+  # Find out more about other implicit resources you can reference within SAM
+  # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
+  Function1Api:
+    Description: "API Gateway endpoint URL for Prod stage for Function1 function"
+    Value: !Sub "https://${Function1APIDEV}.execute-api.${AWS::Region}.amazonaws.com/Prod/function1/"
+  Function1Function:
+    Description: "Function1 Lambda Function ARN"
+    Value: !GetAtt Function1DEVFunction.Arn
+  Function1FunctionIamRole:
+    Description: "Implicit IAM Role created for Function1 function"
+    Value: !GetAtt Function1DEVFunctionRole.Arn
